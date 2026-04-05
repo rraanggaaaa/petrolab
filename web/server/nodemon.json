@@ -1,0 +1,24 @@
+{
+  "watch": [
+    ".",
+    "config",
+    "controllers",
+    "middleware",
+    "models",
+    "routes",
+    "app.js"
+  ],
+  "ext": "js,json",
+  "ignore": ["node_modules", "migrations", "seeders", "logs", "*.test.js"],
+  "exec": "node app.js",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000,
+  "verbose": true,
+  "events": {
+    "start": "clear && echo '🚀 Starting server...'",
+    "restart": "echo '🔄 Restarting due to changes...'",
+    "crash": "echo '❌ Server crashed! Check your code.'"
+  }
+}

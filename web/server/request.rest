@@ -1,0 +1,164 @@
+### ========================================
+### INVENTORY API TESTING - SEDERHANA
+### Base URL: http://localhost:5000
+### ========================================
+
+@baseUrl = http://localhost:5000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc1NDE4OTA4LCJleHAiOjE3NzYwMjM3MDh9.2-BD0DXKkRWVBumFf2_9SyvKvpgPNJkwtkjw1TX9oUw
+
+### ========================================
+### 1. HEALTH CHECK
+### ========================================
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Root Endpoint
+GET {{baseUrl}}/
+
+### ========================================
+### 2. AUTHENTICATION
+### ========================================
+
+### Register User Baru
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Register Admin
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "email": "admin@example.com",
+  "password": "admin123",
+  "role": "admin"
+}
+
+### Login - Test User (Ambil tokennya)
+# @name loginTest
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Login - Admin (Ambil tokennya)
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin123"
+}
+
+### SET TOKEN MANUAL - Copy token dari response login di atas
+# @name setToken
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### ========================================
+### 3. GET CURRENT USER (/me)
+### ========================================
+
+### Get Current User Info (Ganti {{token}} dengan token dari login)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImVtYWlsIjoiYWRtaW5AZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzU0MTgxODIsImV4cCI6MTc3NjAyMjk4Mn0.VazYIWcuLMudSVp3ReHlZ1RO2glPqjHgcalHx6gfHn0
+
+### Get Current User (Dengan variable token - setelah diisi)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### ========================================
+### 4. ITEMS CRUD (Butuh Token)
+### ========================================
+
+### [1] Create Item Baru
+POST {{baseUrl}}/api/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Laptop ASUS ROG",
+  "description": "Gaming laptop RTX 4060",
+  "quantity": 10,
+  "price": 15000000,
+  "category": "Electronics"
+}
+
+### [2] Get All Items
+GET {{baseUrl}}/api/items
+Authorization: Bearer {{token}}
+
+### [3] Get Items dengan Pagination
+GET {{baseUrl}}/api/items?page=1&limit=5
+Authorization: Bearer {{token}}
+
+### [4] Get Items Filter Category
+GET {{baseUrl}}/api/items?category=Electronics
+Authorization: Bearer {{token}}
+
+### [5] Get Items Search
+GET {{baseUrl}}/api/items?search=laptop
+Authorization: Bearer {{token}}
+
+### [6] Get Single Item by ID (Ganti 1 dengan ID item)
+GET {{baseUrl}}/api/items/1
+Authorization: Bearer {{token}}
+
+### [7] Update Item
+PUT {{baseUrl}}/api/items/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Laptop ASUS ROG Strix",
+  "quantity": 15,
+  "price": 18000000
+}
+
+### [8] Delete Item (Ganti 1 dengan ID item)
+DELETE {{baseUrl}}/api/items/1
+Authorization: Bearer {{token}}
+
+### [9] Get All Categories
+GET {{baseUrl}}/api/items/categories
+Authorization: Bearer {{token}}
+
+### ========================================
+### 5. TEST ERROR HANDLING
+### ========================================
+
+### Tanpa Token (Harus 401)
+GET {{baseUrl}}/api/items
+
+### Token Invalid (Harus 403)
+GET {{baseUrl}}/api/items
+Authorization: Bearer invalid_token_12345
+
+### Get Item Not Found (Harus 404)
+GET {{baseUrl}}/api/items/99999
+Authorization: Bearer {{token}}
+
+### Create Item Invalid (Negative Quantity)
+POST {{baseUrl}}/api/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Invalid Item",
+  "quantity": -5,
+  "price": 100000
+}
+
+### Route Not Found (Harus 404)
+GET {{baseUrl}}/api/route-not-exist
