@@ -1,0 +1,64 @@
+import { useState } from 'react';
+
+/**
+ * SearchBar Component
+ * Input search dengan debounce
+ * @param {function} onSearch - Fungsi ketika search
+ * @param {string} placeholder - Placeholder text
+ * @param {number} debounceDelay - Delay debounce in ms
+ */
+const SearchBar = ({ onSearch, placeholder = 'Search...', debounceDelay = 500 }) => {
+    const [value, setValue] = useState('');
+    const [debounceTimeout, setDebounceTimeout] = useState(null);
+
+    const handleChange = (e) => {
+        const newValue = e.target.value;
+        setValue(newValue);
+
+        // Clear previous timeout
+        if (debounceTimeout) {
+            clearTimeout(debounceTimeout);
+        }
+
+        // Set new timeout
+        const timeout = setTimeout(() => {
+            onSearch(newValue);
+        }, debounceDelay);
+
+        setDebounceTimeout(timeout);
+    };
+
+    const handleClear = () => {
+        setValue('');
+        onSearch('');
+    };
+
+    return (
+        <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <input
+                type="text"
+                value={value}
+                onChange={handleChange}
+                placeholder={placeholder}
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-petrolab-primary focus:border-transparent"
+            />
+            {value && (
+                <button
+                    onClick={handleClear}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            )}
+        </div>
+    );
+};
+
+export default SearchBar;

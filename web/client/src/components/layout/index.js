@@ -1,0 +1,7 @@
+// Export all layout components for easier imports
+export { default as Header } from './Header';
+export { default as Footer } from './Footer';
+export { default as Sidebar } from './Sidebar';
+export { default as UserLayout } from './UserLayout';
+export { default as AdminLayout } from './AdminLayout';
+export { default as AuthLayout } from './AuthLayout';
