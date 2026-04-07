@@ -16,7 +16,10 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  credentials: true,
+}));
 app.use(compression());
 app.use(morgan('combined'));
 app.use(express.json());

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL dari backend Express (port 5000)
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api' || 'http://192.168.1.19:5000/api';
 
 // Helper functions for token management
 const getToken = () => {

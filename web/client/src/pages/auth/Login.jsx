@@ -17,6 +17,10 @@ const Login = () => {
 
     const [localErrors, setLocalErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // PWA Install States
+    const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const [isInstalling, setIsInstalling] = useState(false);
 
     const from = location.state?.from?.pathname || '/dashboard';
 
@@ -25,6 +29,74 @@ const Login = () => {
             clearError();
         };
     }, [clearError]);
+
+    // PWA Installation Handler - Always available
+    useEffect(() => {
+        // Handle beforeinstallprompt event
+        const handleBeforeInstallPrompt = (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            setDeferredPrompt(e);
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        // Handle app installed event
+        const handleAppInstalled = () => {
+            showSuccess('App installed successfully! You can now find Petrolab on your home screen.');
+        };
+
+        window.addEventListener('appinstalled', handleAppInstalled);
+
+        // Cleanup
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+        };
+    }, [showSuccess]);
+
+    const handleInstallClick = async () => {
+        if (!deferredPrompt) {
+            showError('Installation is not available at this moment. Make sure you are using a supported browser (Chrome, Edge, Samsung Internet).');
+            return;
+        }
+
+        setIsInstalling(true);
+
+        try {
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+                showSuccess('App installation started! Follow the browser prompts.');
+            } else {
+                console.log('User dismissed the install prompt');
+                showError('Installation cancelled. You can try again later.');
+            }
+            
+            // Clear the deferredPrompt for the next time
+            setDeferredPrompt(null);
+            
+            // Re-attach the event listener for future prompts
+            const handleNewPrompt = (e) => {
+                e.preventDefault();
+                setDeferredPrompt(e);
+            };
+            
+            window.addEventListener('beforeinstallprompt', handleNewPrompt, { once: true });
+            
+        } catch (error) {
+            console.error('Error during installation:', error);
+            showError('Failed to install app. Please try again.');
+        } finally {
+            setIsInstalling(false);
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -98,6 +170,35 @@ const Login = () => {
 
                 {/* Form Card */}
                 <div className="bg-white py-8 px-6 shadow-lg rounded-lg sm:px-10">
+                    {/* PWA Install Button - ALWAYS VISIBLE */}
+                    <div className="mb-6">
+                        <button
+                            onClick={handleInstallClick}
+                            disabled={isInstalling}
+                            className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md"
+                        >
+                            {isInstalling ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Installing...
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Install App to Home Screen
+                                </>
+                            )}
+                        </button>
+                        <p className="text-xs text-center text-gray-500 mt-2">
+                            Install for faster access and offline features
+                        </p>
+                    </div>
+
                     {/* Error Alert */}
                     {error && (
                         <Alert
@@ -190,6 +291,22 @@ const Login = () => {
                                 Create an account
                             </Link>
                         </p>
+                    </div>
+
+                    {/* Installation Guide for different browsers */}
+                    <div className="mt-6 pt-4 border-t border-gray-200">
+                        <details className="text-xs text-gray-500">
+                            <summary className="cursor-pointer hover:text-gray-700">
+                                📱 How to install on different browsers?
+                            </summary>
+                            <div className="mt-2 space-y-1">
+                                <p><strong>Chrome:</strong> Tap menu (⋮) → Install App</p>
+                                <p><strong>Safari (iOS):</strong> Tap Share → Add to Home Screen</p>
+                                <p><strong>Samsung Internet:</strong> Tap menu (≡) → Install App</p>
+                                <p><strong>Firefox:</strong> Tap menu (⋮) → Install</p>
+                                <p><strong>Edge:</strong> Tap menu (⋯) → Install App</p>
+                            </div>
+                        </details>
                     </div>
                 </div>
             </div>
