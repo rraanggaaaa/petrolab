@@ -1,3 +1,4 @@
+flutter run -d emulator-5554
 ```markdown
 # 🧪 Petrolab Inventory Management System
 

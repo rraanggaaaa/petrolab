@@ -9,6 +9,7 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider, ItemProvider } from "./contexts";
 import { PrivateRoute, AdminRoute } from "./components/auth";
 import { UserLayout, AdminLayout } from "./components/layout";
+import Home from "./pages/Home";
 
 // Pages - Auth
 import Login from "./pages/auth/Login";
@@ -26,7 +27,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminItems from "./pages/admin/AdminItems";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminCategories from "./pages/admin/AdminCategories";
-import AdminReports from './pages/admin/AdminReports';
+import AdminReports from "./pages/admin/AdminReports";
 
 function App() {
   return (
@@ -60,13 +61,17 @@ function App() {
 
           <Routes>
             {/* ======================================== */}
-            {/* PUBLIC ROUTES (Login & Register) */}
+            {/* PUBLIC ROUTES */}
             {/* ======================================== */}
+            {/* Home Page - untuk user belum login */}
+            <Route path="/" element={<Home />} />
+
+            {/* Auth Pages */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
             {/* ======================================== */}
-            {/* USER ROUTES (Role: user) */}
+            {/* USER ROUTES (Role: user) - setelah login */}
             {/* ======================================== */}
             <Route element={<PrivateRoute />}>
               <Route element={<UserLayout />}>
@@ -84,31 +89,21 @@ function App() {
             {/* ======================================== */}
             <Route element={<AdminRoute />}>
               <Route element={<AdminLayout />}>
-                {/* Admin Dashboard */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-                {/* Admin Items Management */}
                 <Route path="/admin/items" element={<AdminItems />} />
                 <Route path="/admin/items/create" element={<ItemForm />} />
                 <Route path="/admin/items/:id" element={<ItemDetail />} />
                 <Route path="/admin/items/:id/edit" element={<ItemForm />} />
-
-                {/* Admin Users Management */}
                 <Route path="/admin/users" element={<AdminUsers />} />
-
-                {/* Admin Categories Management */}
                 <Route path="/admin/categories" element={<AdminCategories />} />
-
-                {/* Admin Reports */}
                 <Route path="/admin/reports" element={<AdminReports />} />
               </Route>
             </Route>
 
             {/* ======================================== */}
-            {/* DEFAULT REDIRECTS */}
+            {/* FALLBACK REDIRECT */}
             {/* ======================================== */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ItemProvider>
       </AuthProvider>
